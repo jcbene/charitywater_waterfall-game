@@ -11,6 +11,7 @@ var circ;
 
 var leftWall;
 var rightWall;
+var boundaries = [];
 var ground;
 
 const CANVAS_WIDTH = 1280;
@@ -22,7 +23,12 @@ const PLAY_AREA_HEIGHT = 720;
 var playX;
 var playY;
 
-var boundaries = [];
+var jerryCanImg;
+var buckets = [];
+
+function preload() {
+    jerryCanImg = loadImage("assets/images/jerry_can_yellow.png");
+}
 
 function setup() {
     createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -38,9 +44,17 @@ function setup() {
 
     leftWall = new Boundary(playX, CANVAS_HEIGHT / 2, 50, CANVAS_HEIGHT, 0);
     rightWall = new Boundary(playX + PLAY_AREA_WIDTH, CANVAS_HEIGHT / 2, 50, CANVAS_HEIGHT, 0);
-    ground = new Boundary(playX + PLAY_AREA_WIDTH / 2, playY + PLAY_AREA_HEIGHT - 25, PLAY_AREA_WIDTH, 50, 0);
+    //ground = new Boundary(playX + PLAY_AREA_WIDTH / 2, playY + PLAY_AREA_HEIGHT - 25, PLAY_AREA_WIDTH, 50, 0);
 
-    //boundaries.push(new Boundary(0, 300, 300, 50, .3));
+    // add some boundaries
+
+    //add buckets
+    var bucketWidth = 90;
+    var bucketHeight = 125;
+
+    buckets.push(new Bucket(playX + PLAY_AREA_WIDTH * 0.25, height - 85, bucketWidth, bucketHeight));
+    buckets.push(new Bucket(playX + PLAY_AREA_WIDTH * 0.50, height - 85, bucketWidth, bucketHeight));
+    buckets.push(new Bucket(playX + PLAY_AREA_WIDTH * 0.75, height - 85, bucketWidth, bucketHeight));
 }
 
 function mousePressed() {
@@ -69,9 +83,18 @@ function draw() {
         boundaries[i].show();
     }
 
+    for (var i = 0; i < buckets.length; i++) {
+        buckets[i].show();
+
+        if (circ && buckets[i].contains(circ)) {
+            console.log("Circle is in bucket " + i);
+            // you can add scoring logic here
+        }
+    }
+
     leftWall.show();
     rightWall.show();
-    ground.show();
+    //ground.show();
 
     drawSidesUI();
 }

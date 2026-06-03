@@ -19,7 +19,7 @@ function Boundary(x,y,w,h,a) {
         translate(pos.x, pos.y);
         rotate(angle);
         rectMode(CENTER);
-        stroke(255);
+        noStroke();
         fill(0);
         rect(0, 0, this.w, this.h);
         pop();
