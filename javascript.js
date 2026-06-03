@@ -7,7 +7,10 @@ var Engine = Matter.Engine,
 
 var engine;
 var world;
+
 var circ;
+var spawnY = 100;
+var previewRadius = 30;
 
 var leftWall;
 var rightWall;
@@ -47,17 +50,22 @@ function setup() {
     //ground = new Boundary(playX + PLAY_AREA_WIDTH / 2, playY + PLAY_AREA_HEIGHT - 25, PLAY_AREA_WIDTH, 50, 0);
 
     // add some boundaries
+    boundaries.push(new Boundary(playX + PLAY_AREA_WIDTH / 2, playY + 400, 300, 20, -0.3));
 
     //add buckets
     var bucketWidth = 90;
     var bucketHeight = 125;
+    var bucketCount = 4;
 
-    buckets.push(new Bucket(playX + PLAY_AREA_WIDTH * 0.25, height - 85, bucketWidth, bucketHeight));
-    buckets.push(new Bucket(playX + PLAY_AREA_WIDTH * 0.50, height - 85, bucketWidth, bucketHeight));
-    buckets.push(new Bucket(playX + PLAY_AREA_WIDTH * 0.75, height - 85, bucketWidth, bucketHeight));
+    for (var i = 0; i < bucketCount; i++) {
+        var bucketX = playX + PLAY_AREA_WIDTH * ((i + 1) / (bucketCount + 1));
+        buckets.push(new Bucket(bucketX, height - 85, bucketWidth, bucketHeight));
+    }
 }
 
 function mousePressed() {
+    var spawnX = constrain(mouseX, playX + previewRadius, playX + PLAY_AREA_WIDTH - previewRadius);
+
     var insidePlayCheck = 
         mouseX > playX && mouseX < playX + PLAY_AREA_WIDTH &&
         mouseY > playY && mouseY < playY + PLAY_AREA_HEIGHT;
@@ -65,15 +73,22 @@ function mousePressed() {
     if (!insidePlayCheck) {
         return;
     }
+    if (circ) {
+        return;
+    }
+
     // delete previous circle if it exists
     if (circ) {
         Composite.remove(world, circ.body);
     }
-    circ = new Circle(mouseX, mouseY, 50);
+
+    circ = new Circle(spawnX, spawnY, previewRadius);
 }
 
 function draw() {
     background(100);
+
+    drawPreviewDroplet();
 
     if (circ) {
         circ.show();
@@ -88,7 +103,11 @@ function draw() {
 
         if (circ && buckets[i].contains(circ)) {
             console.log("Circle is in bucket " + i);
-            // you can add scoring logic here
+            // collision detected, remove the circle and update score
+            Composite.remove(world, circ.body);
+            circ = null;
+
+
         }
     }
 
