@@ -1,11 +1,14 @@
-function Circle(x,y,r) {
+function Boundary(x,y,w,h,a) {
     var options = {
         friction: 0.5,
-        restitution: 0.75
+        restitution: 0.6,
+        angle: a,
+        isStatic: true
     }
-    this.body = Bodies.circle(x, y, r, options);
-    this.r = r;
-
+    this.body = Bodies.rectangle(x, y, w, h, options);
+    this.w = w;
+    this.h = h;
+    
     Composite.add(world, this.body);
 
     this.show = function() {
@@ -17,8 +20,8 @@ function Circle(x,y,r) {
         rotate(angle);
         rectMode(CENTER);
         stroke(255);
-        fill(0, 51, 102);
-        ellipse(0, 0, this.r*2, this.r*2);
+        fill(0);
+        rect(0, 0, this.w, this.h);
         pop();
         
     }
