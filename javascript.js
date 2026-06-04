@@ -9,7 +9,8 @@ var engine;
 var world;
 
 var circ;
-var spawnY = 100;
+var spawnY = 110;
+var cloudPreviewY = 40;
 var previewRadius = 30;
 
 var leftWall;
@@ -118,6 +119,7 @@ function mousePressed() {
 function draw() {
     background(0, 161, 157);
 
+    drawPreviewCloud();
     drawPreviewDroplet();
 
     if (circ) {
@@ -179,31 +181,45 @@ function drawSidesUI() {
 function pushCloudBoundaries() {
     // cloud pegs
     boundaries.push(new CloudPeg(
-        playX + PLAY_AREA_WIDTH * 0.30,
-        180,
+        playX + PLAY_AREA_WIDTH * 0.5,
+        210,
         28
     ));
 
     boundaries.push(new CloudPeg(
-        playX + PLAY_AREA_WIDTH * 0.70,
-        180,
+        playX + PLAY_AREA_WIDTH * 0.75,
+        270,
+        28
+    ));
+
+    boundaries.push(new CloudPeg(
+        playX + PLAY_AREA_WIDTH * 0.25,
+        270,
         28
     ));
 
     // cloud platforms
     boundaries.push(new CloudPlatform(
-        playX + PLAY_AREA_WIDTH * 0.35,
-        320,
+        playX + PLAY_AREA_WIDTH * 0.5,
+        410,
         160,
         28,
-        0.35
+        1.5
     ));
 
     boundaries.push(new CloudPlatform(
-        playX + PLAY_AREA_WIDTH * 0.65,
-        420,
-        160,
-        28,
-        -0.35
+        playX + PLAY_AREA_WIDTH * 0.75,
+        410,
+        135,
+        30,
+        -0.5
+    ));
+
+    boundaries.push(new CloudPlatform(
+        playX + PLAY_AREA_WIDTH * 0.25,
+        410,
+        135,
+        30,
+        0.5
     ));
 }
