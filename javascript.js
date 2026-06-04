@@ -29,8 +29,39 @@ var playY;
 var jerryCanImg;
 var buckets = [];
 
+var cloudPegImg;
+var cloudPlatformImg;
+
 function preload() {
-    jerryCanImg = loadImage("assets/images/jerry_can_yellow.png");
+    jerryCanImg = loadImage(
+        "assets/images/jerry_can_yellow.png",
+        function() {
+            console.log("Jerry can loaded");
+        },
+        function() {
+            console.error("Jerry can failed to load");
+        }
+    );
+
+    cloudPegImg = loadImage(
+        "assets/images/cloud_peg.png",
+        function() {
+            console.log("Cloud peg loaded");
+        },
+        function() {
+            console.error("Cloud peg failed to load");
+        }
+    );
+
+    cloudPlatformImg = loadImage(
+        "assets/images/cloud_platform.png",
+        function() {
+            console.log("Cloud platform loaded");
+        },
+        function() {
+            console.error("Cloud platform failed to load");
+        }
+    );
 }
 
 function setup() {
@@ -49,9 +80,6 @@ function setup() {
     rightWall = new Boundary(playX + PLAY_AREA_WIDTH, CANVAS_HEIGHT / 2, 50, CANVAS_HEIGHT, 0);
     //ground = new Boundary(playX + PLAY_AREA_WIDTH / 2, playY + PLAY_AREA_HEIGHT - 25, PLAY_AREA_WIDTH, 50, 0);
 
-    // add some boundaries
-    boundaries.push(new Boundary(playX + PLAY_AREA_WIDTH / 2, playY + 400, 300, 20, -0.3));
-
     //add buckets
     var bucketWidth = 90;
     var bucketHeight = 125;
@@ -61,6 +89,8 @@ function setup() {
         var bucketX = playX + PLAY_AREA_WIDTH * ((i + 1) / (bucketCount + 1));
         buckets.push(new Bucket(bucketX, height - 85, bucketWidth, bucketHeight));
     }
+
+    pushCloudBoundaries();
 }
 
 function mousePressed() {
@@ -93,6 +123,7 @@ function draw() {
     if (circ) {
         circ.show();
     }
+
     if (circ && circ.isOffScreen()) {
         Composite.remove(world, circ.body);
         circ = null;
@@ -107,11 +138,8 @@ function draw() {
 
         if (circ && buckets[i].contains(circ)) {
             console.log("Circle is in bucket " + i);
-            // collision detected, remove the circle and update score
             Composite.remove(world, circ.body);
             circ = null;
-
-
         }
     }
 
@@ -146,4 +174,36 @@ function drawSidesUI() {
     text("Score/droplets left/", rightUICenterX, 130);
     text("[ button ]", rightUICenterX, 150);
     pop();
+}
+
+function pushCloudBoundaries() {
+    // cloud pegs
+    boundaries.push(new CloudPeg(
+        playX + PLAY_AREA_WIDTH * 0.30,
+        180,
+        28
+    ));
+
+    boundaries.push(new CloudPeg(
+        playX + PLAY_AREA_WIDTH * 0.70,
+        180,
+        28
+    ));
+
+    // cloud platforms
+    boundaries.push(new CloudPlatform(
+        playX + PLAY_AREA_WIDTH * 0.35,
+        320,
+        160,
+        28,
+        0.35
+    ));
+
+    boundaries.push(new CloudPlatform(
+        playX + PLAY_AREA_WIDTH * 0.65,
+        420,
+        160,
+        28,
+        -0.35
+    ));
 }
