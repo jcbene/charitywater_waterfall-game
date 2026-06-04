@@ -1,7 +1,7 @@
 function Circle(x,y,r) {
     var options = {
         friction: 0.5,
-        restitution: 0.75
+        restitution: 0.8
     }
     this.body = Bodies.circle(x, y, r, options);
     this.r = r;
@@ -10,7 +10,7 @@ function Circle(x,y,r) {
 
     this.isOffScreen = function() {
         var pos = this.body.position;
-        return (pos.y > height + 100);
+        return (pos.y > height + 200);
     }
 
     this.show = function() {

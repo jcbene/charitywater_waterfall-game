@@ -86,12 +86,16 @@ function mousePressed() {
 }
 
 function draw() {
-    background(100);
+    background(0, 161, 157);
 
     drawPreviewDroplet();
 
     if (circ) {
         circ.show();
+    }
+    if (circ && circ.isOffScreen()) {
+        Composite.remove(world, circ.body);
+        circ = null;
     }
 
     for (var i = 0; i < boundaries.length; i++) {
