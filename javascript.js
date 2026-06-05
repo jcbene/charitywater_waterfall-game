@@ -4,25 +4,32 @@ var Engine = Matter.Engine,
     Composite = Matter.Composite;
 
     
-
+// Global variables
 var engine;
 var world;
 
+// Game objects
 var circ;
 var spawnY = 110;
 var cloudPreviewY = 40;
 var previewRadius = 30;
 
+// Boundaries
 var leftWall;
 var rightWall;
 var boundaries = [];
 var ground;
 
-var collectables = [];
+// Game state variables
 var score = 0;
 var snappedScore = 0;
+var flOzPerCollectable = 150;
+var collectables = [];
 var savedCollectableStates = [];
+var playerDropletsLeft = 7;
+var snappedPlayerDropletsLeft = 7;
 
+// UI constants
 const CANVAS_WIDTH = 1280;
 const CANVAS_HEIGHT = 720;
 
@@ -32,6 +39,10 @@ const PLAY_AREA_HEIGHT = 720;
 var playX;
 var playY;
 
+// Assets
+var logo;
+var openingScreenImg;
+
 var jerryCanImg;
 var buckets = [];
 
@@ -39,6 +50,13 @@ var cloudPegImg;
 var cloudPlatformImg;
 
 function preload() {
+    openingScreenImg = loadImage(
+        "assets/images/openingScreen.png",
+        function() {
+            console.log("Opening screen loaded");
+        }
+    );
+
     jerryCanImg = loadImage(
         "assets/images/jerry_can_yellow.png",
         function() {
@@ -68,6 +86,15 @@ function preload() {
             console.error("Cloud platform failed to load");
         }
     );
+    logo = loadImage(
+        "assets/images/charitywater_logo_vertical_WhiteText.png",
+        function() {
+            console.log("logo loaded");
+        },
+        function() {
+            console.log("logo failed to load");
+        }
+    )
 }
 
 function setup() {
@@ -101,6 +128,20 @@ function setup() {
 }
 
 function mousePressed() {
+    if (gameState === "title") {
+        if (charityLinkClicked(playX + PLAY_AREA_WIDTH / 2, height - 40)) {
+            window.open("https://www.charitywater.org/", "_blank");
+            return;
+        }
+
+        gameState = "playing";
+        return;
+    }
+
+    if (handleGameOverClick()) {
+        return;
+    }
+    
     var spawnX = constrain(mouseX, playX + previewRadius, playX + PLAY_AREA_WIDTH - previewRadius);
 
     // Checks to ensure clicks only register within the play area and when there isn't already a circle in play
@@ -120,11 +161,20 @@ function mousePressed() {
     }
 
     saveTurnState();
+
+    playerDropletsLeft--;
     circ = new Circle(spawnX, spawnY, previewRadius);
 }
 
 function draw() {
     background(0, 161, 157);
+
+    if (gameState === "title") {
+        drawTitleScreen();
+        return;
+    }
+
+    drawWhiteBg();
 
     drawPreviewCloud();
     drawPreviewDroplet();
@@ -146,10 +196,11 @@ function draw() {
         collectables[i].show();
 
         if (collectables[i].checkCollected(circ)) {
-            score += 100;
+            score += flOzPerCollectable;
+            circ.grow(1.35)
             console.log("Collected droplet! Score: " + score);
+        }
     }
-}
 
     for (var i = 0; i < buckets.length; i++) {
         buckets[i].show();
@@ -166,6 +217,38 @@ function draw() {
     //ground.show();
 
     drawSidesUI();
+
+    checkWinLose();
+    drawGameOverScreen();
+}
+
+function drawWhiteBg() {
+    push();
+
+    var whiteStartY = height - 160;
+    var fadeHeight = 50;
+
+    var topColor = color(0, 161, 157);
+    var bottomColor = color(255);
+
+    noStroke();
+
+    // fully white bottom first
+    fill(255);
+    rect(playX, whiteStartY, PLAY_AREA_WIDTH, height - whiteStartY);
+
+    // gradient overlaps slightly into white
+    for (var y = whiteStartY - fadeHeight; y <= whiteStartY + 2; y++) {
+        var amount = map(y, whiteStartY - fadeHeight, whiteStartY, 0, 1);
+        amount = constrain(amount, 0, 1);
+
+        var gradientColor = lerpColor(topColor, bottomColor, amount);
+
+        stroke(gradientColor);
+        line(playX, y, playX + PLAY_AREA_WIDTH, y);
+    }
+
+    pop();
 }
 
 function drawSidesUI() {
@@ -183,16 +266,28 @@ function drawSidesUI() {
     var leftUICenterX = playX / 2;
     var rightUICenterX = playX + PLAY_AREA_WIDTH + (playX / 2);
 
-    text("UI", leftUICenterX, 50);
-    text("UI", rightUICenterX, 50);
+    text("WATERFALL", leftUICenterX, 90);
+
+    var logoMaxW = 220;
+    var logoScale = logoMaxW / logo.width;
+    var logoW = logoMaxW;
+    var logoH = logo.height * logoScale;
+
+    imageMode(CENTER);
+    image(logo, rightUICenterX, 90, logoW, logoH);
 
     textSize(18);
-    text("Click inside the play area", leftUICenterX, 100);
-    text("to drop a circle", leftUICenterX, 120);
-    text("Score: " + score, rightUICenterX, 130);
-    text("Droplets left: " + (16 - Math.floor(score / 100)), rightUICenterX, 150);
+    text("Click inside the play area", leftUICenterX, 210);
+    text("to drop a circle", leftUICenterX, 235);
+    text("Press R to reset the drop", leftUICenterX, 270);
+
+    text("Player Droplets left: " + playerDropletsLeft, rightUICenterX, 210);
+    text("Water collected: " + score + " fl oz", rightUICenterX, 235);
+    text("Droplets left: " + (16 - Math.floor(score / 150)), rightUICenterX, 260);
     pop();
 }
+
+
 
 function pushCloudBoundaries() {
     // cloud pegs
@@ -271,6 +366,7 @@ function saveTurnState() {
     }
 
     snappedScore = score;
+    snappedPlayerDropletsLeft = playerDropletsLeft;
 }
 
 function restoreTurnState() {
@@ -294,6 +390,7 @@ function resetCurrentDrop() {
     restoreTurnState();
 
     score = snappedScore;
+    playerDropletsLeft = snappedPlayerDropletsLeft;
 }
 
 function keyPressed() {

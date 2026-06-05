@@ -8,6 +8,15 @@ function Circle(x,y,r) {
 
     Composite.add(world, this.body);
 
+    this.grow = function(amount) {
+        var oldR = this.r;
+        this.r += amount;
+
+        var scaleAmount = this.r / oldR;
+
+        Matter.Body.scale(this.body, scaleAmount, scaleAmount);
+    }
+
     this.isOffScreen = function() {
         var pos = this.body.position;
         return (pos.y > height + 200);
