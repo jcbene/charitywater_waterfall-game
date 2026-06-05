@@ -20,6 +20,8 @@ var ground;
 
 var collectables = [];
 var score = 0;
+var snappedScore = 0;
+var savedCollectableStates = [];
 
 const CANVAS_WIDTH = 1280;
 const CANVAS_HEIGHT = 720;
@@ -117,6 +119,7 @@ function mousePressed() {
         Composite.remove(world, circ.body);
     }
 
+    saveTurnState();
     circ = new Circle(spawnX, spawnY, previewRadius);
 }
 
@@ -143,7 +146,7 @@ function draw() {
         collectables[i].show();
 
         if (collectables[i].checkCollected(circ)) {
-            score += 1;
+            score += 100;
             console.log("Collected droplet! Score: " + score);
     }
 }
@@ -187,7 +190,7 @@ function drawSidesUI() {
     text("Click inside the play area", leftUICenterX, 100);
     text("to drop a circle", leftUICenterX, 120);
     text("Score: " + score, rightUICenterX, 130);
-    text("Droplets left: " + (3 - score), rightUICenterX, 150);
+    text("Droplets left: " + (16 - Math.floor(score / 100)), rightUICenterX, 150);
     pop();
 }
 
@@ -238,7 +241,63 @@ function pushCloudBoundaries() {
 }
 
 function pushCollectables() {
-    collectables.push(new Collectable(playX + PLAY_AREA_WIDTH * 0.35, 250, 12));
-    collectables.push(new Collectable(playX + PLAY_AREA_WIDTH * 0.65, 330, 12));
-    collectables.push(new Collectable(playX + PLAY_AREA_WIDTH * 0.50, 520, 12));
+    collectables.push(new Collectable(playX + PLAY_AREA_WIDTH * .5, 150, 12));
+
+    collectables.push(new Collectable(playX + PLAY_AREA_WIDTH * 0.625, 225, 12));
+    collectables.push(new Collectable(playX + PLAY_AREA_WIDTH * 0.595, 325, 12));
+    collectables.push(new Collectable(playX + PLAY_AREA_WIDTH * 0.78, 325, 12));
+    collectables.push(new Collectable(playX + PLAY_AREA_WIDTH * 0.68, 355, 12));
+    collectables.push(new Collectable(playX + PLAY_AREA_WIDTH * 0.595, 425, 12));
+    collectables.push(new Collectable(playX + PLAY_AREA_WIDTH * 0.595, 525, 12));
+    collectables.push(new Collectable(playX + PLAY_AREA_WIDTH * 0.8, 525, 12));
+
+    collectables.push(new Collectable(playX + PLAY_AREA_WIDTH * .5, 275, 12));
+
+    collectables.push(new Collectable(playX + PLAY_AREA_WIDTH * 0.375, 225, 12));
+    collectables.push(new Collectable(playX + PLAY_AREA_WIDTH * 0.405, 325, 12));
+    collectables.push(new Collectable(playX + PLAY_AREA_WIDTH * 0.22, 325, 12));
+    collectables.push(new Collectable(playX + PLAY_AREA_WIDTH * 0.32, 355, 12));
+    collectables.push(new Collectable(playX + PLAY_AREA_WIDTH * 0.405, 425, 12));
+    collectables.push(new Collectable(playX + PLAY_AREA_WIDTH * 0.405, 525, 12));
+    collectables.push(new Collectable(playX + PLAY_AREA_WIDTH * 0.2, 525, 12));
+}
+
+// Turn state handling
+function saveTurnState() {
+    savedCollectableStates = [];
+
+    for (var i = 0; i < collectables.length; i++) {
+        savedCollectableStates.push(collectables[i].collected);
+    }
+
+    snappedScore = score;
+}
+
+function restoreTurnState() {
+    for (var i = 0; i < collectables.length; i++) {
+        collectables[i].collected = savedCollectableStates[i];
+
+        if (!collectables[i].collected) {
+            Composite.add(world, collectables[i].body);
+        } else {
+            Composite.remove(world, collectables[i].body);
+        }
+    }
+}
+
+function resetCurrentDrop() {
+    if (circ) {
+        Composite.remove(world, circ.body);
+        circ = null;
+    }
+
+    restoreTurnState();
+
+    score = snappedScore;
+}
+
+function keyPressed() {
+    if (key === 'r' || key === 'R') {
+        resetCurrentDrop();
+    }
 }

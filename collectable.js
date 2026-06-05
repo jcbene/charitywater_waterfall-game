@@ -5,7 +5,7 @@ function Collectable(x, y, r) {
     });
 
     this.r = r;
-    this.collected = false;
+    this.collected = false; // flag to track if this collectable has been collected
 
     Composite.add(world, this.body);
 
