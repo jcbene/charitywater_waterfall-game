@@ -2,6 +2,7 @@ var Engine = Matter.Engine,
     Runner = Matter.Runner,
     Bodies = Matter.Bodies,
     Composite = Matter.Composite;
+    Events = Matter.Events;
 
     
 // Global variables
@@ -49,6 +50,8 @@ var buckets = [];
 var cloudPegImg;
 var cloudPlatformImg;
 
+var bgMusic;
+
 function preload() {
     openingScreenImg = loadImage(
         "assets/images/openingScreen.png",
@@ -95,6 +98,15 @@ function preload() {
             console.log("logo failed to load");
         }
     )
+
+    bgMusic = loadSound("assets/music/atoo.mp3",
+        function() {
+            console.log("music loaded");
+        },
+        function() {
+            console.log("music failed to load");
+        }
+    )
 }
 
 function setup() {
@@ -105,6 +117,21 @@ function setup() {
 
     var runner = Runner.create();
     Runner.run(runner, engine);
+
+    Events.on(engine, "collisionStart", function(event) {
+        if (!circ) {
+            return;
+        }
+
+        for (var i = 0; i < event.pairs.length; i++) {
+            var bodyA = event.pairs[i].bodyA;
+            var bodyB = event.pairs[i].bodyB;
+
+            if (bodyA === circ.body || bodyB === circ.body) {
+                circ.squash();
+            }
+        }
+    });
 
     playX = (CANVAS_WIDTH - PLAY_AREA_WIDTH) / 2;
     playY = (CANVAS_HEIGHT - PLAY_AREA_HEIGHT) / 2; // not really necessary since play area is same height as canvas, but just in case
@@ -168,6 +195,8 @@ function mousePressed() {
 
 function draw() {
     background(0, 161, 157);
+
+    updateMusic();
 
     if (gameState === "title") {
         drawTitleScreen();
@@ -280,6 +309,8 @@ function drawSidesUI() {
     text("Click inside the play area", leftUICenterX, 210);
     text("to drop a circle", leftUICenterX, 235);
     text("Press R to reset the drop", leftUICenterX, 270);
+    text("100% of public donations", leftUICenterX, 500);
+    text("go directly to water projects.", leftUICenterX, 520);
 
     text("Player Droplets left: " + playerDropletsLeft, rightUICenterX, 210);
     text("Water collected: " + score + " fl oz", rightUICenterX, 235);
@@ -396,5 +427,22 @@ function resetCurrentDrop() {
 function keyPressed() {
     if (key === 'r' || key === 'R') {
         resetCurrentDrop();
+    }
+}
+
+function updateMusic() {
+    if (!bgMusic) {
+        return;
+    }
+
+    if (gameState === "playing") {
+        if (!bgMusic.isPlaying()) {
+            bgMusic.setVolume(0.55);
+            bgMusic.loop();
+        }
+    } else {
+        if (bgMusic.isPlaying()) {
+            bgMusic.stop();
+        }
     }
 }
