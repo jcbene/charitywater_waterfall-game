@@ -18,6 +18,9 @@ var rightWall;
 var boundaries = [];
 var ground;
 
+var collectables = [];
+var score = 0;
+
 const CANVAS_WIDTH = 1280;
 const CANVAS_HEIGHT = 720;
 
@@ -92,15 +95,16 @@ function setup() {
     }
 
     pushCloudBoundaries();
+    pushCollectables();
 }
 
 function mousePressed() {
     var spawnX = constrain(mouseX, playX + previewRadius, playX + PLAY_AREA_WIDTH - previewRadius);
 
+    // Checks to ensure clicks only register within the play area and when there isn't already a circle in play
     var insidePlayCheck = 
         mouseX > playX && mouseX < playX + PLAY_AREA_WIDTH &&
         mouseY > playY && mouseY < playY + PLAY_AREA_HEIGHT;
-    
     if (!insidePlayCheck) {
         return;
     }
@@ -108,7 +112,7 @@ function mousePressed() {
         return;
     }
 
-    // delete previous circle if it exists
+    // Delete previous circle if it exists
     if (circ) {
         Composite.remove(world, circ.body);
     }
@@ -134,6 +138,15 @@ function draw() {
     for (var i = 0; i < boundaries.length; i++) {
         boundaries[i].show();
     }
+
+    for (var i = 0; i < collectables.length; i++) {
+        collectables[i].show();
+
+        if (collectables[i].checkCollected(circ)) {
+            score += 1;
+            console.log("Collected droplet! Score: " + score);
+    }
+}
 
     for (var i = 0; i < buckets.length; i++) {
         buckets[i].show();
@@ -173,8 +186,8 @@ function drawSidesUI() {
     textSize(18);
     text("Click inside the play area", leftUICenterX, 100);
     text("to drop a circle", leftUICenterX, 120);
-    text("Score/droplets left/", rightUICenterX, 130);
-    text("[ button ]", rightUICenterX, 150);
+    text("Score: " + score, rightUICenterX, 130);
+    text("Droplets left: " + (3 - score), rightUICenterX, 150);
     pop();
 }
 
@@ -204,7 +217,7 @@ function pushCloudBoundaries() {
         410,
         160,
         28,
-        1.5
+        1.6
     ));
 
     boundaries.push(new CloudPlatform(
@@ -222,4 +235,10 @@ function pushCloudBoundaries() {
         30,
         0.5
     ));
+}
+
+function pushCollectables() {
+    collectables.push(new Collectable(playX + PLAY_AREA_WIDTH * 0.35, 250, 12));
+    collectables.push(new Collectable(playX + PLAY_AREA_WIDTH * 0.65, 330, 12));
+    collectables.push(new Collectable(playX + PLAY_AREA_WIDTH * 0.50, 520, 12));
 }

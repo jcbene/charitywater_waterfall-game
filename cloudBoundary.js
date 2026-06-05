@@ -1,7 +1,7 @@
 function CloudPeg(x, y, r) {
     this.body = Bodies.circle(x, y, r, {
         isStatic: true,
-        friction: 0.1,
+        friction: 0,
         restitution: .8
     });
 
