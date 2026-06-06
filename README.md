@@ -52,6 +52,9 @@ Learn more about charity: water and its clean-water projects:
 
 https://www.charitywater.org/
 
+## Looking Ahead
+Whenever I get back to this, it would definitely be to refactor a lot of functions, simplify and organize file hierarchy, fine-tune physics and squash-stretch aesthetics, and rework the UI.
+
 ## Disclaimer
 
 Any charity: water names, logos, branding, or related assets remain the property of their respective owners.
